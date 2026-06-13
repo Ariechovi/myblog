@@ -1,0 +1,22 @@
+node_modules/
+myblog_env/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+*.sqlite3
+db.sqlite3
+config.ini
+.env
+.env.local
+.env.production
+.DS_Store
+.idea/
+.vscode/
+dist/
+dist-ssr/
+*.tsbuildinfo
+
+# 旧的前端配置文件 (有效的是 myblogfront/myblog/package.json)
+myblogfront/package.json
+myblogfront/package-lock.json
