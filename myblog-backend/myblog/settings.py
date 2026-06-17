@@ -17,21 +17,32 @@ import configparser
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Load configuration from config.ini
-config = configparser.ConfigParser()
+config = configparser.RawConfigParser()
 config.read(BASE_DIR / 'config.ini')
+
+
+def _cfg(section, key, fallback):
+    return config.get(section, key, fallback=fallback)
+
+
+def _cfg_bool(section, key, fallback):
+    try:
+        return config.getboolean(section, key)
+    except (configparser.NoSectionError, configparser.NoOptionError, ValueError):
+        return fallback
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config['django']['SECRET_KEY']
+SECRET_KEY = _cfg('django', 'SECRET_KEY', 'django-insecure-pmiv^xvv@*8^*j^5(#io%kqi_nfpf&fgnrrl&yx25n!%fn-u-5')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config.getboolean('django', 'DEBUG', fallback=False)
+DEBUG = _cfg_bool('django', 'DEBUG', True)
 
-ALLOWED_HOSTS = [h.strip() for h in config.get('django', 'ALLOWED_HOSTS', fallback='').split(',') if h.strip()]
+_allowed = _cfg('django', 'ALLOWED_HOSTS', 'localhost,127.0.0.1')
+ALLOWED_HOSTS = [h.strip() for h in _allowed.split(',') if h.strip()]
 
 
 # Application definition
@@ -86,11 +97,11 @@ WSGI_APPLICATION = "myblog.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'my_blog',
-        'USER': 'postgres',
-        'PASSWORD': config['database']['PASSWORD'],
-        'HOST': config['database']['HOST'],
-        'PORT': '5432',
+        'NAME': _cfg('database', 'NAME', 'my_blog'),
+        'USER': _cfg('database', 'USER', 'postgres'),
+        'PASSWORD': _cfg('database', 'PASSWORD', '123456'),
+        'HOST': _cfg('database', 'HOST', 'localhost'),
+        'PORT': _cfg('database', 'PORT', '5432'),
     }
 }
 
@@ -137,10 +148,8 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vite 默认端口
-    "http://127.0.0.1:5173",  # 你实际访问的前端地址
-]
+_cors = _cfg('cors', 'ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173')
+CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors.split(',') if o.strip()]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -151,8 +160,8 @@ REST_FRAMEWORK = {
 
 from datetime import timedelta
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(_cfg('jwt', 'ACCESS_TOKEN_MINUTES', '120'))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(_cfg('jwt', 'REFRESH_TOKEN_DAYS', '7'))),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 

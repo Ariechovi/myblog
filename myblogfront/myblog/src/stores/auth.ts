@@ -2,10 +2,11 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { login as apiLogin, register as apiRegister, refreshToken, getUserInfo } from '@/api/auth'
 import type { UserInfo, LoginParams, RegisterParams } from '@/api/auth'
+import { TOKEN_KEY, REFRESH_TOKEN_KEY } from '@/config'
 
 export const useAuthStore = defineStore('auth', () => {
-  const accessToken = ref<string>(localStorage.getItem('access_token') || '')
-  const refreshTokenValue = ref<string>(localStorage.getItem('refresh_token') || '')
+  const accessToken = ref<string>(localStorage.getItem(TOKEN_KEY) || '')
+  const refreshTokenValue = ref<string>(localStorage.getItem(REFRESH_TOKEN_KEY) || '')
   const user = ref<UserInfo | null>(null)
   const loading = ref(false)
 
@@ -15,15 +16,15 @@ export const useAuthStore = defineStore('auth', () => {
   function saveTokens(access: string, refresh: string) {
     accessToken.value = access
     refreshTokenValue.value = refresh
-    localStorage.setItem('access_token', access)
-    localStorage.setItem('refresh_token', refresh)
+    localStorage.setItem(TOKEN_KEY, access)
+    localStorage.setItem(REFRESH_TOKEN_KEY, refresh)
   }
 
   function clearTokens() {
     accessToken.value = ''
     refreshTokenValue.value = ''
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(REFRESH_TOKEN_KEY)
   }
 
   async function login(params: LoginParams) {
